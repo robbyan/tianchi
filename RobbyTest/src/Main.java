@@ -15,54 +15,49 @@ import pojo.ItemRecord;
 import pojo.UserRecord;
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.google.common.base.Joiner;
-
 public class Main {
 
 	public static void main(String args[]) throws Exception {
-		dailyBuyedItems();
+		dailyBuyedItems(true);
 //		splitToTrainAndTestData();
 //		 splitData(100);
 //		 refineData();
 //		 calculateConvertRatio();
-//		 predict();
-//		finalResult();
+//		 predictData();
+		filterPredictData("2014-12-17");
+		finalResult();
 	}
 	
+	//collect all result together
 	public static void finalResult() throws Exception{
 	
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\predictData_after_2014_12_12.csv";
+		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\filterPredictData.csv";
 		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\final_result.csv";
 		
 		FileReader fr = new FileReader(srcFile);
 		BufferedReader br = new BufferedReader(fr);
 		String s = "";
 		String[] columns = s.split(",");
-		Map<String, List<String>> resultMap = new HashMap<>();
-		while ((s = br.readLine()) != null) {
-			columns = s.replaceAll("\"", "").split(",");
-			String userId= columns[0];
-			String itemId= columns[1];
-			if(!resultMap.containsKey(userId)){
-				resultMap.put(userId, new ArrayList<String>());
-			}
-			resultMap.get(userId).add(itemId);
-		}
 		CSVWriter writer = null;
 		try {
 			writer = new CSVWriter(new FileWriter(targetFile));
 		} catch (IOException e) {
 		}
-		for(Entry<String, List<String>> entry:resultMap.entrySet()){
-			writer.writeNext(new String[]{entry.getKey(),Joiner.on(",").join(entry.getValue())});
+		while ((s = br.readLine()) != null) {
+			columns = s.replaceAll("\"", "").split(",");
+			String userId= columns[0];
+			String itemId= columns[1];
+			writer.writeNext(new String[]{userId,itemId});
 		}
+	
+
 		writer.close();
 	}
 	
-	public static void predict() throws Exception {
+	public static void predictData() throws Exception {
 		String testFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\testData.csv";
 		String predictFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\predictData.csv";
-		Map<String, double[]> ratioMap=calculateConvertRatio();
+		Map<String, String[]> ratioMap=calculateConvertRatio();
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(testFile, Arrays.asList("3"));
 		
 		CSVWriter writer = null;
@@ -77,9 +72,9 @@ public class Main {
 				if(!list.isEmpty()){
 					ItemRecord itemRecord = list.get(list.size()-1);
 					if(ratioMap.containsKey(userId)){
-						writer.writeNext(new String[]{userId,itemRecord.getItemId(),itemRecord.getTime(),ratioMap.get(userId)[0]+"",ratioMap.get(userId)[1]+""});
+						writer.writeNext(new String[]{userId,itemRecord.getItemId(),itemRecord.getTime(),ratioMap.get(userId)[0],ratioMap.get(userId)[1],ratioMap.get(userId)[2],ratioMap.get(userId)[3]});
 					}else{
-						writer.writeNext(new String[]{userId,itemRecord.getItemId(),itemRecord.getTime(),"NAN","NAN"});
+						writer.writeNext(new String[]{userId,itemRecord.getItemId(),itemRecord.getTime(),"NAN","NAN","NAN","NAN"});
 					}
 				}
 			}
@@ -87,14 +82,61 @@ public class Main {
 		}
 		writer.close();
 	}
+	
+	public static void filterPredictData(String asOfTime) throws Exception {
+		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\predictData.csv";
+		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\filterPredictData.csv";
+		String itemFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_item.csv";
+		Map<String, String> itemMap  = DataLoader.loadItemData(itemFile, true);
+		CSVWriter writer = null;
+		try {
+			writer = new CSVWriter(new FileWriter(targetFile));
+		} catch (IOException e) {
+		}
+		FileReader fr = new FileReader(srcFile);
+		BufferedReader br = new BufferedReader(fr);
+		String s = "";
+		String[] columns = s.split(",");
+		while ((s = br.readLine()) != null) {
+			columns = s.replaceAll("\"", "").split(",");
+			String userId= columns[0];
+			String itemId= columns[1];
+			String time = columns[2];
+			String avgTime = columns[5];
+			if(!itemMap.containsKey(itemId)){
+				continue;
+			}
+			boolean isValid =  false;
+			try{
+			String listTime = columns[6];
+			
+			for(String hour:listTime.split(":")){
+				
+				int hourInt=Integer.valueOf(hour);
+				
+				if( hourInt>24 && hourInt <48){
+					isValid =true;
+				}
+				
+			}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			if(time.compareTo(asOfTime)>0 && isValid && Double.valueOf(avgTime)<=49){
+				writer.writeNext(columns);
+			}
+		}
+		
+		writer.close();
+	}
 
-	public static Map<String, double[]> calculateConvertRatio() throws Exception {
+	public static Map<String, String[]> calculateConvertRatio() throws Exception {
 		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\refined_Cart_Purchase.csv";
 		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\convert_ratio.csv";
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(srcFile);
 		List<UserRecord> list = DataLoader.convertMapToList(map);
 
-		Map<String, double[]> ratioMap = new HashMap<String, double[]>();
+		Map<String, String[]> ratioMap = new HashMap<String, String[]>();
 		CSVWriter writer = null;
 		try {
 			writer = new CSVWriter(new FileWriter(targetFile));
@@ -102,11 +144,13 @@ public class Main {
 		}
 	
 		for (UserRecord ur : list) {
-			writer.writeNext(new String[]{ur.getUserId(),ur.getConvertRatio()+"",ur.getConvertRatioByLatestCart()+""});
-			ratioMap.put(ur.getUserId(), new double[]{ur.getConvertRatio(),ur.getConvertRatioByLatestCart()});
+			writer.writeNext(new String[]{ur.getUserId(),ur.getConvertRatio()+"",ur.getConvertRatioByLatestCart()+"",ur.getAverageConvertTimeInHour()+"",ur.listConvertTimeInHour()});
+			ratioMap.put(ur.getUserId(), new String[]{ur.getConvertRatio()+"",ur.getConvertRatioByLatestCart()+"",ur.getAverageConvertTimeInHour()+"",ur.listConvertTimeInHour()});
 			System.out.println("User Id: " + ur.getUserId());
 			System.out.println("	Convert Ratio: " + ur.getConvertRatio());
 			System.out.println("	Convert Ratio of item in cart: " + ur.getConvertRatioByLatestCart());
+			System.out.println("	Convert time of item in cart: " + ur.listConvertTimeInHour());
+			System.out.println("	Average Convert time of item in cart: " + ur.getAverageConvertTimeInHour());
 		}
 		writer.close();
 		return ratioMap;
@@ -138,11 +182,17 @@ public class Main {
 
 	}
 	
-	public static void dailyBuyedItems() throws Exception {
+	public static void dailyBuyedItems(boolean filter) throws Exception {
 		
 		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\refined_Cart_Purchase.csv";
 		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\dailySales.csv";
+		if(filter){
+			 targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\dailySales_p.csv";
+		}
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(srcFile, Arrays.asList("4"));
+		
+		String itemFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_item.csv";
+		Map<String, String> itemMap  = DataLoader.loadItemData(itemFile, true);
 		
 		Map<String,List<ItemRecord>> dayMap = new HashMap<String,List<ItemRecord>>();
 		for (Entry<String, Map<String, List<ItemRecord>>> entry : map.entrySet()) {
@@ -158,7 +208,13 @@ public class Main {
 					if(!dayMap.containsKey(date)){
 						dayMap.put(date, new ArrayList<ItemRecord>());
 					}
-					dayMap.get(date).add(itemRecord);	
+					if(filter){
+						if(itemMap.containsKey(itemRecord.getItemId())){
+							dayMap.get(date).add(itemRecord);
+						}
+					}else{
+						dayMap.get(date).add(itemRecord);
+					}	
 				}
 			}
 		}

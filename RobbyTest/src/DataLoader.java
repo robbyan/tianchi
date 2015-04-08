@@ -60,6 +60,24 @@ public class DataLoader {
 		return map;
 	}
 	
+	public static Map<String, String> loadItemData(String file, boolean containsHeader) throws Exception{
+		Map<String, String> map = new HashMap<>();
+		FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
+		String s = "";
+		if(containsHeader){
+			s = br.readLine();
+		}
+		String[] columns = s.split(",");
+		while ((s = br.readLine()) != null) {
+			columns = s.replaceAll("\"", "").split(",");
+			String itemId= columns[0];
+			String categoryId= columns[2];			
+			map.put(itemId, categoryId);
+		}
+		return map;
+	}
+	
 	public static Map<String, Map<String, List<ItemRecord>>> loadData(String srcFile, List<String> behaviors) throws Exception {
 		Map<String, Map<String, List<ItemRecord>>> map = new HashMap();
 		FileReader fr = new FileReader(srcFile);

@@ -116,4 +116,21 @@ public class CategoryRecord {
 		return result;
 	}
 
+	public int getConvertTimeInHour(){
+		List<ItemRecord> buyedItems = listTotalBuyedItem();
+		List<ItemRecord> cartItems = listTotalAddToChartItem();
+		if(!buyedItems.isEmpty()&&!cartItems.isEmpty()){
+			ItemRecord buyedItem =  buyedItems.get(buyedItems.size()-1);
+			for(int i=cartItems.size();i>0;i--){
+				ItemRecord cartItem =  cartItems.get(i-1);
+				if (buyedItem.getItemId().equalsIgnoreCase(cartItem.getItemId())) {
+					if(buyedItem.getDate().compareTo(cartItem.getDate())>=0){
+						return (int) ((buyedItem.getDate().getTime()-cartItem.getDate().getTime())/(3600*1000));
+					}
+				}
+			}
+		}
+		
+		throw new RuntimeException("Not available");
+	}
 }

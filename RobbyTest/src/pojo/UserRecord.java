@@ -3,6 +3,8 @@ package pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Joiner;
+
 public class UserRecord {
 	private String userId;
 	private List<CategoryRecord> categaries = new ArrayList<CategoryRecord>();
@@ -50,5 +52,34 @@ public class UserRecord {
 			}
 		}
 		return buyedCount*100/categaries.size();
+	}
+	
+	public double getAverageConvertTimeInHour(){
+		int count=0;
+		int totalHours=0;
+		for(CategoryRecord cr:categaries){
+			try{
+				totalHours=totalHours+cr.getConvertTimeInHour();
+				count++;
+			}catch(Exception e){
+				
+			}
+		}
+		if(count>0){
+			return totalHours/count;
+		}
+		return Double.NaN;
+	}
+	
+	public String listConvertTimeInHour(){
+		List<String> list=new ArrayList<String>();
+		for(CategoryRecord cr:categaries){
+			try{
+				list.add(cr.getConvertTimeInHour()+"");
+			}catch(Exception e){
+				
+			}
+		}
+		return Joiner.on(":").join(list);
 	}
 }
