@@ -20,13 +20,13 @@ import com.google.common.base.Joiner;
 public class Main {
 
 	public static void main(String args[]) throws Exception {
-//		dailyBuyedItems();
+		dailyBuyedItems();
 //		splitToTrainAndTestData();
 //		 splitData(100);
 //		 refineData();
 //		 calculateConvertRatio();
 //		 predict();
-		finalResult();
+//		finalResult();
 	}
 	
 	public static void finalResult() throws Exception{
@@ -142,7 +142,7 @@ public class Main {
 		
 		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\refined_Cart_Purchase.csv";
 		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\dailySales.csv";
-		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(srcFile, false);
+		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(srcFile, Arrays.asList("4"));
 		
 		Map<String,List<ItemRecord>> dayMap = new HashMap<String,List<ItemRecord>>();
 		for (Entry<String, Map<String, List<ItemRecord>>> entry : map.entrySet()) {
