@@ -32,6 +32,87 @@ public class CategoryRecord {
 		this.categoryId = categoryId;
 	}
 
+	public int getDuration() {
+		int size = this.getItems().size();
+		if (size <= 1) {
+			return 0;
+		} else {
+			ItemRecord firstItem = this.getItems().get(0);
+			ItemRecord latestItem = this.getItems().get(size - 1);
+
+			return (int) ((latestItem.getDate().getTime() - firstItem.getDate()
+					.getTime()) / (3600 * 1000));
+		}
+	}
+
+	public int getDurationForBuy() {
+		if (getTotalBuyedCount() < 1) {
+			return -1;
+		}
+		ItemRecord firstItem = this.getItems().get(0);
+		ItemRecord latestItem = this.listTotalBuyedItem().get(0);
+		return (int) ((latestItem.getDate().getTime() - firstItem.getDate()
+				.getTime()) / (3600 * 1000));
+	}
+
+	public String getDurationForBuyBeginDate() {
+		ItemRecord firstItem = this.getItems().get(0);
+		return firstItem.getTime();
+	}
+
+	public String getDurationForBuyEndDate() {
+		ItemRecord latestItem = this.listTotalBuyedItem().get(0);
+		return latestItem.getTime();
+	}
+
+	public boolean isBuyedItemInCart() {
+		boolean result = false;
+		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
+		for (ItemRecord cartItem : this.listItemsByBehavior("3")) {
+			if (cartItem.getItemId().equals(buyedItem.getItemId())) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public boolean isBuyedItemInBookmark() {
+		boolean result = false;
+		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
+		for (ItemRecord cartItem : this.listItemsByBehavior("2")) {
+			if (cartItem.getItemId().equals(buyedItem.getItemId())) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public boolean isBuyedCategoryInBookmark() {
+		boolean result = false;
+		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
+		for (ItemRecord cartItem : this.listItemsByBehavior("2")) {
+			if (cartItem.getDate().compareTo(buyedItem.getDate()) <= 0) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public boolean isBuyedCategoryInCart() {
+		boolean result = false;
+		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
+		for (ItemRecord cartItem : this.listItemsByBehavior("3")) {
+			if (cartItem.getDate().compareTo(buyedItem.getDate()) <= 0) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * @return the percentage of the items buyed in cart
 	 **/
@@ -44,7 +125,7 @@ public class CategoryRecord {
 	 **/
 	public boolean isLastestCartItemGetBuyed() {
 		ItemRecord item = getLatestItemInCart();
-		if(item  == null){
+		if (item == null) {
 			return false;
 		}
 		for (ItemRecord buyedItem : listTotalBuyedItem()) {
@@ -57,7 +138,23 @@ public class CategoryRecord {
 	}
 
 	public ItemRecord getLatestItemInCart() {
-		List<ItemRecord> list = listTotalAddToChartItem();
+		List<ItemRecord> list = listItemsByBehavior("3");
+		if (list.isEmpty()) {
+			return null;
+		}
+		return list.get(list.size() - 1);
+	}
+
+	public ItemRecord getBrowsedLatestItem() {
+		List<ItemRecord> list = listItemsByBehavior("1");
+		if (list.isEmpty()) {
+			return null;
+		}
+		return list.get(list.size() - 1);
+	}
+
+	public ItemRecord getBookmarkedLatestItem() {
+		List<ItemRecord> list = listItemsByBehavior("2");
 		if (list.isEmpty()) {
 			return null;
 		}
@@ -80,21 +177,21 @@ public class CategoryRecord {
 		List<ItemRecord> list = new ArrayList<ItemRecord>();
 		for (ItemRecord item : items) {
 			if (item.getBehaviorType().trim().equalsIgnoreCase(behavior)) {
-				if(!isItemExistInList(item,list)){
+				if (!isItemExistInList(item, list)) {
 					list.add(item);
 				}
 			}
 		}
 		return list;
 	}
-	
-	public boolean isItemExistInList(ItemRecord item,List<ItemRecord> list){
-		for(ItemRecord ir:list){
-			if(ir.getItemId().equalsIgnoreCase(item.getItemId())){
+
+	public boolean isItemExistInList(ItemRecord item, List<ItemRecord> list) {
+		for (ItemRecord ir : list) {
+			if (ir.getItemId().equalsIgnoreCase(item.getItemId())) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -108,7 +205,8 @@ public class CategoryRecord {
 		List<ItemRecord> cartItems = listTotalAddToChartItem();
 		for (ItemRecord buyedItem : buyedItems) {
 			for (ItemRecord cartItem : cartItems) {
-				if (buyedItem.getItemId().equalsIgnoreCase(cartItem.getItemId())) {
+				if (buyedItem.getItemId()
+						.equalsIgnoreCase(cartItem.getItemId())) {
 					result.add(buyedItem);
 				}
 			}
@@ -116,21 +214,23 @@ public class CategoryRecord {
 		return result;
 	}
 
-	public int getConvertTimeInHour(){
+	public int getConvertTimeInHour() {
 		List<ItemRecord> buyedItems = listTotalBuyedItem();
 		List<ItemRecord> cartItems = listTotalAddToChartItem();
-		if(!buyedItems.isEmpty()&&!cartItems.isEmpty()){
-			ItemRecord buyedItem =  buyedItems.get(buyedItems.size()-1);
-			for(int i=cartItems.size();i>0;i--){
-				ItemRecord cartItem =  cartItems.get(i-1);
-				if (buyedItem.getItemId().equalsIgnoreCase(cartItem.getItemId())) {
-					if(buyedItem.getDate().compareTo(cartItem.getDate())>=0){
-						return (int) ((buyedItem.getDate().getTime()-cartItem.getDate().getTime())/(3600*1000));
+		if (!buyedItems.isEmpty() && !cartItems.isEmpty()) {
+			ItemRecord buyedItem = buyedItems.get(buyedItems.size() - 1);
+			for (int i = cartItems.size(); i > 0; i--) {
+				ItemRecord cartItem = cartItems.get(i - 1);
+				if (buyedItem.getItemId()
+						.equalsIgnoreCase(cartItem.getItemId())) {
+					if (buyedItem.getDate().compareTo(cartItem.getDate()) >= 0) {
+						return (int) ((buyedItem.getDate().getTime() - cartItem
+								.getDate().getTime()) / (3600 * 1000));
 					}
 				}
 			}
 		}
-		
+
 		throw new RuntimeException("Not available");
 	}
 }

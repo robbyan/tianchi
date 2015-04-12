@@ -2,11 +2,14 @@ package pojo;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class ItemRecord {
-	private final static SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH");
-	private final static SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd");
+	private final static SimpleDateFormat dateTimeFormatter = new SimpleDateFormat(
+			"yyyy-MM-dd HH");
+	private final static SimpleDateFormat dateFormatter = new SimpleDateFormat(
+			"yyyy-MM-dd");
 
 	private String userId;
 	private String itemId;
@@ -82,7 +85,15 @@ public class ItemRecord {
 		return null;
 	}
 
-	public String getDateAsString(){
+	public String getDateAsString() {
 		return this.time.substring(0, 10);
 	}
+
+	public int getDayofWeek() {
+		Date date = getDate();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		return calendar.get(Calendar.DAY_OF_WEEK);
+	}
+
 }

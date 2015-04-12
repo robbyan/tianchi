@@ -57,6 +57,13 @@ public class DataLoader {
 			}
 			map.get(record.getUserId()).get(record.getItemCategory()).add(record);
 		}
+		for (Entry<String, Map<String, List<ItemRecord>>> entry : map.entrySet()) {
+			Map<String, List<ItemRecord>> categoryMap = entry.getValue();
+			for (Entry<String, List<ItemRecord>> categoryEntry : categoryMap.entrySet()) {
+				List<ItemRecord> list = categoryEntry.getValue();
+				Collections.sort(list, new ItemComparator());
+			}
+		}
 		return map;
 	}
 	
