@@ -6,6 +6,8 @@ import java.util.List;
 public class CategoryRecord {
 	private String categoryId;
 
+	private List<ItemGroup> itemGroups = new ArrayList<>();
+
 	private List<ItemRecord> items = new ArrayList<ItemRecord>();
 
 	public List<ItemRecord> getItems() {
@@ -30,87 +32,6 @@ public class CategoryRecord {
 
 	public void setCategoryId(String categoryId) {
 		this.categoryId = categoryId;
-	}
-
-	public int getDuration() {
-		int size = this.getItems().size();
-		if (size <= 1) {
-			return 0;
-		} else {
-			ItemRecord firstItem = this.getItems().get(0);
-			ItemRecord latestItem = this.getItems().get(size - 1);
-
-			return (int) ((latestItem.getDate().getTime() - firstItem.getDate()
-					.getTime()) / (3600 * 1000));
-		}
-	}
-
-	public int getDurationForBuy() {
-		if (getTotalBuyedCount() < 1) {
-			return -1;
-		}
-		ItemRecord firstItem = this.getItems().get(0);
-		ItemRecord latestItem = this.listTotalBuyedItem().get(0);
-		return (int) ((latestItem.getDate().getTime() - firstItem.getDate()
-				.getTime()) / (3600 * 1000));
-	}
-
-	public String getDurationForBuyBeginDate() {
-		ItemRecord firstItem = this.getItems().get(0);
-		return firstItem.getTime();
-	}
-
-	public String getDurationForBuyEndDate() {
-		ItemRecord latestItem = this.listTotalBuyedItem().get(0);
-		return latestItem.getTime();
-	}
-
-	public boolean isBuyedItemInCart() {
-		boolean result = false;
-		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
-		for (ItemRecord cartItem : this.listItemsByBehavior("3")) {
-			if (cartItem.getItemId().equals(buyedItem.getItemId())) {
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-
-	public boolean isBuyedItemInBookmark() {
-		boolean result = false;
-		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
-		for (ItemRecord cartItem : this.listItemsByBehavior("2")) {
-			if (cartItem.getItemId().equals(buyedItem.getItemId())) {
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-
-	public boolean isBuyedCategoryInBookmark() {
-		boolean result = false;
-		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
-		for (ItemRecord cartItem : this.listItemsByBehavior("2")) {
-			if (cartItem.getDate().compareTo(buyedItem.getDate()) <= 0) {
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-
-	public boolean isBuyedCategoryInCart() {
-		boolean result = false;
-		ItemRecord buyedItem = this.listTotalBuyedItem().get(0);
-		for (ItemRecord cartItem : this.listItemsByBehavior("3")) {
-			if (cartItem.getDate().compareTo(buyedItem.getDate()) <= 0) {
-				result = true;
-				break;
-			}
-		}
-		return result;
 	}
 
 	/**
@@ -232,5 +153,13 @@ public class CategoryRecord {
 		}
 
 		throw new RuntimeException("Not available");
+	}
+
+	public List<ItemGroup> getItemGroups() {
+		return itemGroups;
+	}
+
+	public void setItemGroups(List<ItemGroup> itemGroups) {
+		this.itemGroups = itemGroups;
 	}
 }

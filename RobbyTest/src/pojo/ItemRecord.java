@@ -18,8 +18,10 @@ public class ItemRecord {
 	private String userGeohash;
 	private String itemCategory;
 	private String time;
+	private String[] columns;
 
 	public ItemRecord(String[] columns) {
+		this.setColumns(columns);
 		this.userId = columns[0];
 		this.itemId = columns[1];
 		this.behaviorType = columns[2];
@@ -93,7 +95,15 @@ public class ItemRecord {
 		Date date = getDate();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		return calendar.get(Calendar.DAY_OF_WEEK);
+		return (calendar.get(Calendar.DAY_OF_WEEK) - 1) % 8;
+	}
+
+	public String[] getColumns() {
+		return columns;
+	}
+
+	public void setColumns(String[] columns) {
+		this.columns = columns;
 	}
 
 }

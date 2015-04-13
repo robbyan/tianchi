@@ -12,13 +12,19 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import pojo.CategoryRecord;
+import pojo.ItemGroup;
 import pojo.ItemRecord;
 import pojo.UserRecord;
 import au.com.bytecode.opencsv.CSVWriter;
 
+//feature list: cartToBuyRatioPerUser
 public class Main {
 
+	private static String ROOT = "c:\\dev\\source\\tianchi\\RobbyTest\\output\\";
+
 	public static void main(String args[]) throws Exception {
+		cartToBuyWithMultiOrderInOneDay2();
+		// cartToBuyWithMultiOrderInOneDay();
 		// prepareForSpiltData();
 		// dailyBuyedItems(true);
 		// splitToTrainAndTestData();
@@ -29,13 +35,13 @@ public class Main {
 		// filterPredictData("2014-12-17");
 		// finalResult();
 		// result();
-		removeDuplicatedResult();
+		// removeDuplicatedResult();
 	}
 
 	public static void result() throws Exception {
-		String srcFile = "c:\\dev\\source\\tianchi\\RobbyTest\\output\\originTestData.csv";
-		String itemFile = "c:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_item.csv";
-		String targetFile = "c:\\dev\\source\\tianchi\\RobbyTest\\output\\target.csv";
+		String srcFile = ROOT + "originTestData.csv";
+		String itemFile = ROOT + "tianchi_mobile_recommend_train_item.csv";
+		String targetFile = ROOT + "target.csv";
 		// Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
 		// srcFile, Arrays.asList("2", "3"));
 		Map<String, String> itemMap = DataLoader.loadItemData(itemFile, true);
@@ -72,8 +78,8 @@ public class Main {
 	}
 
 	public static void removeDuplicatedResult() throws Exception {
-		String srcFile = "c:\\dev\\source\\tianchi\\RobbyTest\\output\\target.csv";
-		String targetFile = "c:\\dev\\source\\tianchi\\RobbyTest\\output\\target_1.csv";
+		String srcFile = ROOT + "target.csv";
+		String targetFile = ROOT + "target_1.csv";
 		Map<String, Set<String>> map = new HashMap<>();
 		FileReader fr = new FileReader(srcFile);
 		BufferedReader br = new BufferedReader(fr);
@@ -108,8 +114,8 @@ public class Main {
 	// collect all result together
 	public static void finalResult() throws Exception {
 
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\filterPredictData.csv";
-		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\final_result.csv";
+		String srcFile = ROOT + "filterPredictData.csv";
+		String targetFile = ROOT + "final_result.csv";
 
 		FileReader fr = new FileReader(srcFile);
 		BufferedReader br = new BufferedReader(fr);
@@ -131,8 +137,8 @@ public class Main {
 	}
 
 	public static void predictData() throws Exception {
-		String testFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\testData.csv";
-		String predictFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\predictData.csv";
+		String testFile = ROOT + "testData.csv";
+		String predictFile = ROOT + "predictData.csv";
 		Map<String, String[]> ratioMap = calculateConvertRatio();
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
 				testFile, Arrays.asList("3"));
@@ -170,9 +176,9 @@ public class Main {
 	}
 
 	public static void filterPredictData(String asOfTime) throws Exception {
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\predictData.csv";
-		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\filterPredictData.csv";
-		String itemFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_item.csv";
+		String srcFile = ROOT + "predictData.csv";
+		String targetFile = ROOT + "filterPredictData.csv";
+		String itemFile = ROOT + "tianchi_mobile_recommend_train_item.csv";
 		Map<String, String> itemMap = DataLoader.loadItemData(itemFile, true);
 		CSVWriter writer = null;
 		try {
@@ -219,8 +225,8 @@ public class Main {
 
 	public static Map<String, String[]> calculateConvertRatio()
 			throws Exception {
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\refined_Cart_Purchase.csv";
-		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\convert_ratio.csv";
+		String srcFile = ROOT + "refined_Cart_Purchase.csv";
+		String targetFile = ROOT + "convert_ratio.csv";
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader
 				.loadData(srcFile);
 		List<UserRecord> list = DataLoader.convertMapToList(map);
@@ -258,17 +264,17 @@ public class Main {
 	}
 
 	public static void refineData() throws Exception {
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\trainData.csv";
-		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\refined_Cart_Purchase.csv";
+		String srcFile = ROOT + "trainData.csv";
+		String targetFile = ROOT + "refined_Cart_Purchase.csv";
 		DataLoader.refineDataFromBehavior(srcFile, Arrays.asList("3", "4"),
 				targetFile);
 	}
 
 	public static void splitData(int numberOfUsers) throws Exception {
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_user.csv";
+		String srcFile = ROOT + "tianchi_mobile_recommend_train_user.csv";
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
 				srcFile, true);
-		String targetFilePrefix = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\data";
+		String targetFilePrefix = ROOT + "data";
 		int userCount = map.size();
 		int fileCount = Math.round(userCount / 100) + 1;
 		for (int i = 0; i < fileCount; i++) {
@@ -287,15 +293,15 @@ public class Main {
 
 	public static void dailyBuyedItems(boolean filter) throws Exception {
 
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\refined_Cart_Purchase.csv";
-		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\dailySales.csv";
+		String srcFile = ROOT + "refined_Cart_Purchase.csv";
+		String targetFile = ROOT + "dailySales.csv";
 		if (filter) {
-			targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\dailySales_p.csv";
+			targetFile = ROOT + "dailySales_p.csv";
 		}
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
 				srcFile, Arrays.asList("4"));
 
-		String itemFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_item.csv";
+		String itemFile = ROOT + "tianchi_mobile_recommend_train_item.csv";
 		Map<String, String> itemMap = DataLoader.loadItemData(itemFile, true);
 
 		Map<String, List<ItemRecord>> dayMap = new HashMap<String, List<ItemRecord>>();
@@ -336,10 +342,74 @@ public class Main {
 		writer.close();
 	}
 
+	public static void cartToBuyWithMultiOrderInOneDay() throws Exception {
+		String srcFile = ROOT + "tianchi_mobile_recommend_train_user.csv";
+		String targetFile = ROOT + "cartToBuyWithMultiOrderInOneDay.csv";
+		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
+				srcFile, Arrays.asList("3", "4"));
+		CSVWriter writer = null;
+		try {
+			writer = new CSVWriter(new FileWriter(targetFile));
+		} catch (IOException e) {
+		}
+		List<UserRecord> urs = DataLoader.convertMapToList(map);
+		for (UserRecord ur : urs) {
+			for (CategoryRecord cr : ur.getCategaries()) {
+				if (cr.listItemsByBehavior("4").size() > 1) {
+					for (ItemRecord ir : cr.getItems()) {
+						String[] columns = ir.getColumns();
+						String[] result = new String[7];
+						for (int i = 0; i < columns.length; i++) {
+							result[i] = columns[i];
+						}
+						result[columns.length] = ir.getDayofWeek() + "";
+						writer.writeNext(result);
+					}
+				}
+			}
+		}
+		writer.close();
+	}
+
+	public static void cartToBuyWithMultiOrderInOneDay2() throws Exception {
+		String srcFile = ROOT + "tianchi_mobile_recommend_train_user.csv";
+		String targetFile = ROOT + "cart_purchase_statistics.csv";
+		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
+				srcFile, Arrays.asList("3", "4"));
+		CSVWriter writer = null;
+		try {
+			writer = new CSVWriter(new FileWriter(targetFile));
+		} catch (IOException e) {
+		}
+		writer.writeNext(new String[] { "user_id", "item_id", "behavior",
+				"geoHash", "category", "time", "dayOfWeek" });
+		List<UserRecord> urs = DataLoader.convertMapToList(map);
+		for (UserRecord ur : urs) {
+			for (CategoryRecord cr : ur.getCategaries()) {
+				// if (cr.listItemsByBehavior("4").size() >= 0) {
+				for (ItemRecord ir : cr.getItems()) {
+					String[] columns = ir.getColumns();
+					// if (ir.getBehaviorType().equals("3")
+					// || ir.getBehaviorType().equals("2")
+					// ) {
+					String[] result = new String[7];
+					for (int i = 0; i < columns.length; i++) {
+						result[i] = columns[i];
+					}
+					result[columns.length] = ir.getDayofWeek() + "";
+					writer.writeNext(result);
+					// }
+					// }
+				}
+			}
+		}
+		writer.close();
+	}
+
 	public static void mostPopularItemsByCategory() throws Exception {
 
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_user.csv";
-		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\dailySales.csv";
+		String srcFile = ROOT + "tianchi_mobile_recommend_train_user.csv";
+		String targetFile = ROOT + "dailySales.csv";
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
 				srcFile, true);
 
@@ -376,7 +446,7 @@ public class Main {
 	}
 
 	public static void preProcess() throws Exception {
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_user.csv";
+		String srcFile = ROOT + "tianchi_mobile_recommend_train_user.csv";
 		Map<String, Map<String, List<ItemRecord>>> map = DataLoader.loadData(
 				srcFile, true);
 		List<UserRecord> list = DataLoader.convertMapToList(map);
@@ -420,15 +490,16 @@ public class Main {
 
 	}
 
+	// 用户购买行为分析，只看目前已购买数据
 	public static void prepareForSpiltData() throws Exception {
-		String srcFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\tianchi_mobile_recommend_train_user.csv";
-		String targetFile = "D:\\dev\\source\\tianchi\\RobbyTest\\output\\evidence_to_split_data.csv";
+		String srcFile = ROOT + "tianchi_mobile_recommend_train_user.csv";
+		String targetFile = ROOT + "evidence_to_split_data.csv";
 		CSVWriter writer = null;
 		try {
 			writer = new CSVWriter(new FileWriter(targetFile));
 		} catch (IOException e) {
 		}
-		writer.writeNext(new String[] { "user_id", "category_id",
+		writer.writeNext(new String[] { "user_id", "item_id", "category_id",
 				"duration_before_buy", "begin_date", "buy_date", "in_cart",
 				"in_bookmark", "cart_or_bookmark", "category_in_cart",
 				"category_in_bookmark", "category_cart_or_bookmark", });
@@ -442,32 +513,35 @@ public class Main {
 			int count = 0;
 			List<CategoryRecord> crs = ur.getCategaries();
 			for (CategoryRecord cr : crs) {
-				int duration = cr.getDurationForBuy();
-				if (duration >= 0) {
-					count++;
-					userDuration = userDuration + duration;
-					writer.writeNext(new String[] {
-							ur.getUserId(),
-							cr.getCategoryId(),
-							duration + "",
-							cr.getDurationForBuyBeginDate(),
-							cr.getDurationForBuyEndDate(),
-							cr.isBuyedItemInCart() + "",
-							cr.isBuyedItemInBookmark() + "",
-							(cr.isBuyedItemInCart() | cr
-									.isBuyedItemInBookmark()) + "",
-							cr.isBuyedCategoryInCart() + "",
-							cr.isBuyedCategoryInBookmark() + "",
-							(cr.isBuyedCategoryInCart() | cr
-									.isBuyedCategoryInBookmark()) + "" });
+				for (ItemGroup ig : cr.getItemGroups()) {
+
+					// int duration = ig.getDurationForBuy();
+					// if (duration >= 0) {
+					// count++;
+					// userDuration = userDuration + duration;
+					// writer.writeNext(new String[] {
+					// ur.getUserId(),
+					// cr.getCategoryId(),
+					// duration + "",
+					// cr.getDurationForBuyBeginDate(),
+					// cr.getDurationForBuyEndDate(),
+					// cr.isBuyedItemInCart() + "",
+					// cr.isBuyedItemInBookmark() + "",
+					// (cr.isBuyedItemInCart() | cr
+					// .isBuyedItemInBookmark()) + "",
+					// cr.isBuyedCategoryInCart() + "",
+					// cr.isBuyedCategoryInBookmark() + "",
+					// (cr.isBuyedCategoryInCart() | cr
+					// .isBuyedCategoryInBookmark()) + "" });
+					// }
 				}
 			}
-			if (count != 0) {
-				System.out.println("average user duration" + userDuration
-						/ count);
-				totalCount = totalCount + count;
-				totoalDuration = totoalDuration + userDuration;
-			}
+			// if (count != 0) {
+			// System.out.println("average user duration" + userDuration
+			// / count);
+			// totalCount = totalCount + count;
+			// totoalDuration = totoalDuration + userDuration;
+			// }
 		}
 		System.out.println("average duration" + totoalDuration / totalCount);
 		writer.close();
@@ -481,9 +555,9 @@ public class Main {
 				originTestFile);
 
 		// String trainFile =
-		// "D:\\dev\\source\\tianchi\\RobbyTest\\output\\trainData.csv";
+		// ROOT + "trainData.csv";
 		// String testFile =
-		// "D:\\dev\\source\\tianchi\\RobbyTest\\output\\testData.csv";
+		// ROOT + "testData.csv";
 		// Map<String, Map<String, List<ItemRecord>>> map =
 		// DataLoader.loadData(srcFile, true);
 		// Map<String, Map<String, List<ItemRecord>>> subMap =
